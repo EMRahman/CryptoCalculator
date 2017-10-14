@@ -1,2 +1,2 @@
 # CryptoCalculator
-Simple cryptocurrency calculator
+Simple cryptocurrency calculator. [Demo](http://ehsanrahman.com/cryptocalc/CryptoCalculator.html).
