@@ -1,0 +1,2 @@
+# CryptoCalculator
+Simple cryptocurrency calculator
