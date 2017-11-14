@@ -34,14 +34,17 @@ $(document).ready(function(){
     dashHoldings=1;
     ethHoldings=1;
     btcHoldings=0.1;
+    bchHoldings=0.1;
 
     ltcValuation=0;
     btcValuation=0;
+    bchValuation=0;
     ethValuation=0;
     dashValuation=0;
 
     ltcCCValuation=0;
     btcCCValuation=0;
+    bchCCValuation=0;
     ethCCValuation=0;
     dashCCValuation=0;
 
@@ -56,6 +59,10 @@ $(document).ready(function(){
    res = localStorage.getItem("btcHoldings");
    if( !(res==null || res=="")) {
      btcHoldings = res;
+   }
+   res = localStorage.getItem("bchHoldings");
+   if( !(res==null || res=="")) {
+     bchHoldings = res;
    }
    res = localStorage.getItem("ethHoldings");
    if( !(res==null || res=="")) {
@@ -73,6 +80,7 @@ $(document).ready(function(){
 
     $(".ltcAmount").text(ltcHoldings);
     $(".btcAmount").text(btcHoldings);
+    $(".bchAmount").text(bchHoldings);
     $(".ethAmount").text(ethHoldings);
     $(".dashAmount").text(dashHoldings);
 
@@ -96,6 +104,17 @@ $(document).ready(function(){
 	     btcHoldings = res;
 	     localStorage.setItem("btcHoldings", btcHoldings);
 	     $(".btcAmount").text(btcHoldings);
+	     getPricesAndUpdateValudation();
+	}
+    });
+    $(".bchAmount").click(function(){
+        var res = prompt("Enter amount");;
+	if (!(res==null || res=="")) {
+	    //var thisClass = $(this).attr("class");
+            //$("."+thisClass).text(res);
+	     bchHoldings = res;
+	     localStorage.setItem("bchHoldings", bchHoldings);
+	     $(".bchAmount").text(bchHoldings);
 	     getPricesAndUpdateValudation();
 	}
     });
@@ -123,21 +142,23 @@ $(document).ready(function(){
     });
 
    //Make obvious buttons are selectable
-   $("#RefreshFXRates,.btcAmount,.ltcAmount,.ethAmount,.dashAmount").css("background-color", '#8FC6F6');
+   $("#RefreshFXRates,.btcAmount,.bchAmount,.ltcAmount,.ethAmount,.dashAmount").css("background-color", '#8FC6F6');
     
 });
 
 var pieChartCounter=0;;
 function checkIfPieChartReadyForCreation(){
 	pieChartCounter++;
-  	if(pieChartCounter%8==0){
+  	if(pieChartCounter%10==0){
 	       var data=[{"cryptoType":"LTC", "totalAmount":ltcValuation},
 			{"cryptoType":"BTC","totalAmount":btcValuation},
+			{"cryptoType":"BCH","totalAmount":bchValuation},
 			{"cryptoType":"DASH","totalAmount":dashValuation},
 			{"cryptoType":"ETH","totalAmount":ethValuation}];
 		createPieChart(data,"#chart");
 	       var dataCC=[{"cryptoType":"LTC", "totalAmount":ltcValuationCC},
 			{"cryptoType":"BTC","totalAmount":btcValuationCC},
+			{"cryptoType":"BCH","totalAmount":bchValuationCC},
 			{"cryptoType":"DASH","totalAmount":dashValuationCC},
 			{"cryptoType":"ETH","totalAmount":ethValuationCC}];
 		createPieChart(dataCC,"#chartCC");
@@ -148,6 +169,7 @@ function createPieChart(data,position){
 
 	var data=[{"cryptoType":"LTC", "totalAmount":ltcValuation}, 
 	{"cryptoType":"BTC","totalAmount":btcValuation},
+	{"cryptoType":"BCH","totalAmount":bchValuation},
 	{"cryptoType":"DASH","totalAmount":dashValuation},
 	{"cryptoType":"ETH","totalAmount":ethValuation}];
 
@@ -156,7 +178,7 @@ function createPieChart(data,position){
 	    radius = Math.min(width, height) / 2;
 
 	var color = d3.scale.ordinal()
-	    .range(["#D5D8DC", "#E67E22", "#5DADE2", "#8E44AD"]);
+	    .range(["#D5D8DC", "#E67E22", "#E67E22",  "#5DADE2", "#8E44AD"]);
 
 	var arc = d3.svg.arc()
 	    .outerRadius(radius - 10)
@@ -210,8 +232,21 @@ function getPricesAndUpdateValudation(){
                   success: function(result){
                       $("#btcPrice").text(format(Number(result.ticker.price)));
                       $("#btcHoldingsValue").text(format(Number(result.ticker.price*btcHoldings)));
-		      valuation+=(result.ticker.price*btcHoldings);
 		      btcValuation=(result.ticker.price*btcHoldings);
+		      valuation+=btcValuation;
+		      $("#valuationInGBP").text(format(Number(valuation)));
+		      checkIfPieChartReadyForCreation();
+                  }
+        });
+	$.ajax({  type: "GET",
+                  dataType: 'json',
+                  async: true,
+                  url: "https://api.cryptonator.com/api/ticker/bch-gbp",
+                  success: function(result){
+                      $("#bchPrice").text(format(Number(result.ticker.price)));
+                      $("#bchHoldingsValue").text(format(Number(result.ticker.price*bchHoldings)));
+		      bchValuation=(result.ticker.price*bchHoldings);
+		      valuation+=bchValuation;
 		      $("#valuationInGBP").text(format(Number(valuation)));
 		      checkIfPieChartReadyForCreation();
                   }
@@ -223,8 +258,8 @@ function getPricesAndUpdateValudation(){
                   success: function(result){
                       $("#ltcPrice").text(format(Number(result.ticker.price)));
                       $("#ltcHoldingsValue").text(format(Number(result.ticker.price*ltcHoldings)));
-		      valuation+=(result.ticker.price*ltcHoldings);
 		      ltcValuation=(result.ticker.price*ltcHoldings);
+		      valuation+=ltcValuation;
 		      $("#valuationInGBP").text(format(Number(valuation)));
 		      checkIfPieChartReadyForCreation();
                   }
@@ -236,8 +271,8 @@ function getPricesAndUpdateValudation(){
                   success: function(result){
                       $("#dashPrice").text(format(Number(result.ticker.price)));
                       $("#dashHoldingsValue").text(format(Number(result.ticker.price*dashHoldings)));
-		      valuation+=(result.ticker.price*dashHoldings);
 		      dashValuation=(result.ticker.price*dashHoldings);
+		      valuation+=dashValuation;
 		      $("#valuationInGBP").text(format(Number(valuation)));
 		      checkIfPieChartReadyForCreation();
                   }
@@ -249,8 +284,8 @@ function getPricesAndUpdateValudation(){
                   success: function(result){
                       $("#ethPrice").text(format(Number(result.ticker.price)));
                       $("#ethHoldingsValue").text(format(Number(result.ticker.price*ethHoldings)));
-		      valuation+=(result.ticker.price*ethHoldings);
 		      ethValuation=(result.ticker.price*ethHoldings);
+		      valuation+=ethValuation;
 		      $("#valuationInGBP").text(format(Number(valuation)));
 		      checkIfPieChartReadyForCreation();
                   }
@@ -265,8 +300,22 @@ function getPricesAndUpdateValudation(){
                   success: function(result){
                       $("#btcPriceCC").text(format(Number(result[0].price_gbp)));
                       $("#btcHoldingsValueCC").text(format(Number(result[0].price_gbp*btcHoldings)));
-		      valuationCC+=(result[0].price_gbp*btcHoldings);
 		      btcValuationCC=(result[0].price_gbp*btcHoldings);
+		      valuationCC+=btcValuationCC;
+		      $("#valuationInGBPCC").text(format(Number(valuationCC)));
+		      checkIfPieChartReadyForCreation();
+                  }
+        });
+
+	$.ajax({  type: "GET",
+                  dataType: 'json',
+                  async: true,
+                  url: "https://api.coinmarketcap.com/v1/ticker/BITCOIN-CASH/?convert=GBP",
+                  success: function(result){
+                      $("#bchPriceCC").text(format(Number(result[0].price_gbp)));
+                      $("#bchHoldingsValueCC").text(format(Number(result[0].price_gbp*bchHoldings)));
+		      bchValuationCC=(result[0].price_gbp*bchHoldings);
+		      valuationCC+=bchValuationCC;
 		      $("#valuationInGBPCC").text(format(Number(valuationCC)));
 		      checkIfPieChartReadyForCreation();
                   }
@@ -279,8 +328,8 @@ function getPricesAndUpdateValudation(){
                   success: function(result){
                       $("#ltcPriceCC").text(format(Number(result[0].price_gbp)));
                       $("#ltcHoldingsValueCC").text(format(Number(result[0].price_gbp*ltcHoldings)));
-		      valuationCC+=(result[0].price_gbp*ltcHoldings);
-		      ltcValuationCC=(result[0].price_gbp*btcHoldings);
+		      ltcValuationCC=(result[0].price_gbp*ltcHoldings);
+		      valuationCC+=ltcValuationCC;
 		      $("#valuationInGBPCC").text(format(Number(valuationCC)));
 		      checkIfPieChartReadyForCreation();
                   }
@@ -293,8 +342,8 @@ function getPricesAndUpdateValudation(){
                   success: function(result){
                       $("#dashPriceCC").text(format(Number(result[0].price_gbp)));
                       $("#dashHoldingsValueCC").text(format(Number(result[0].price_gbp*dashHoldings)));
-		      valuationCC+=(result[0].price_gbp*dashHoldings);
 		      dashValuationCC=(result[0].price_gbp*dashHoldings);
+		      valuationCC+=dashValuationCC;
 		      $("#valuationInGBPCC").text(format(Number(valuationCC)));
 		      checkIfPieChartReadyForCreation();
                   }
@@ -307,8 +356,8 @@ function getPricesAndUpdateValudation(){
                   success: function(result){
                       $("#ethPriceCC").text(format(Number(result[0].price_gbp)));
                       $("#ethHoldingsValueCC").text(format(Number(result[0].price_gbp*ethHoldings)));
-		      valuationCC+=(result[0].price_gbp*ethHoldings);
 		      ethValuationCC=(result[0].price_gbp*ethHoldings);
+		      valuationCC+=ethValuationCC;
 		      $("#valuationInGBPCC").text(format(Number(valuationCC)));
 		      checkIfPieChartReadyForCreation();
                   }
@@ -319,8 +368,8 @@ function getPricesAndUpdateValudation(){
 
 </head>
 <body align="center">
-<h2>Simple Crypto Calculator</h2>
-<i>GBP calcualtor for BTC, LTC, ETH &amp DASH. Crypto amounts saved on your browser.</i>
+<h2>Crypto Calculator</h2>
+<i>GBP calcualtor for BTC, BCH, LTC, ETH &amp DASH. Crypto amounts saved on your browser.</i>
 <br/>
 <br/>
 <table border=0 align="center">
@@ -333,6 +382,7 @@ function getPricesAndUpdateValudation(){
 		<tr><td>LTC</td><td class="ltcAmount"></td><td>&pound;<placeholder id="ltcPrice"/></td><td>&pound;<placeholder id="ltcHoldingsValue"></td></tr>
 		<tr><td>DASH</td><td class="dashAmount"></td><td>&pound;<placeholder  id="dashPrice"></td><td>&pound;<placeholder  id="dashHoldingsValue"></td></tr>
 		<tr><td>BTC</td><td class="btcAmount"></td><td>&pound;<placeholder  id="btcPrice"></td><td>&pound;<placeholder  id="btcHoldingsValue"></td></tr>
+		<tr><td>BCH</td><td class="bchAmount"></td><td>&pound;<placeholder  id="bchPrice"></td><td>&pound;<placeholder  id="bchHoldingsValue"></td></tr>
 		<tr><td>ETH</td><td class="ethAmount"></td><td>&pound;<placeholder  id="ethPrice"></td><td>&pound;<placeholder  id="ethHoldingsValue"></td></tr>
 		</table>
 	</td>
@@ -349,6 +399,7 @@ function getPricesAndUpdateValudation(){
 		<tr><td>LTC</td><td class="ltcAmount"></td><td>&pound;<placeholder  id="ltcPriceCC"></td><td>&pound;<placeholder  id="ltcHoldingsValueCC"></td></tr>
 		<tr><td>DASH</td><td class="dashAmount"></td><td>&pound;<placeholder  id="dashPriceCC"></td><td>&pound;<placeholder  id="dashHoldingsValueCC"></td></tr>
 		<tr><td>BTC</td><td class="btcAmount"></td><td>&pound;<placeholder  id="btcPriceCC"></td><td>&pound;<placeholder  id="btcHoldingsValueCC"></td></tr>
+		<tr><td>BCH</td><td class="bchAmount"></td><td>&pound;<placeholder  id="bchPriceCC"></td><td>&pound;<placeholder  id="bchHoldingsValueCC"></td></tr>
 		<tr><td>ETH</td><td class="ethAmount"></td><td>&pound;<placeholder  id="ethPriceCC"></td><td>&pound;<placeholder  id="ethHoldingsValueCC"></td></tr>
 		</table>
 	</td>
