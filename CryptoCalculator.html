@@ -29,60 +29,51 @@ function format(n, sep, decimals) {
 
 $(document).ready(function(){
 
-    //Default Holdings
-    ltcHoldings=10;
-    dashHoldings=1;
-    ethHoldings=1;
-    btcHoldings=0.1;
-    bchHoldings=0.1;
-
     ltcValuation=0;
     btcValuation=0;
     bchValuation=0;
     ethValuation=0;
     dashValuation=0;
+    xrpValuation=0;
 
     ltcCCValuation=0;
     btcCCValuation=0;
     bchCCValuation=0;
     ethCCValuation=0;
     dashCCValuation=0;
+    xrpCCValuation=0;
 
     valuation=0;
     valuationCC=0;
-    
-    //If exists in local web storage; use the values
-   res = localStorage.getItem("ltcHoldings");
-   if( !(res==null || res=="")) {
-     ltcHoldings = res;
-   }
-   res = localStorage.getItem("btcHoldings");
-   if( !(res==null || res=="")) {
-     btcHoldings = res;
-   }
-   res = localStorage.getItem("bchHoldings");
-   if( !(res==null || res=="")) {
-     bchHoldings = res;
-   }
-   res = localStorage.getItem("ethHoldings");
-   if( !(res==null || res=="")) {
-     ethHoldings = res;
-   }
-   res = localStorage.getItem("dashHoldings");
-   if( !(res==null || res=="")) {
-     dashHoldings = res;
-   }
+   
+    //Load portfolio; default is A
+    portfolioName = 'A';
+    retreiveAndSetPortfolioValues(portfolioName);
+    $("#PortfolioA,#PortfolioB,#PortfolioC").css("background-color", '#8FC6F6');
+    $("#PortfolioA").css("background-color", '#E67E22');
 
-    getPricesAndUpdateValudation();
-    $("#RefreshFXRates").click(function(){
-        getPricesAndUpdateValudation();
+    $("#PortfolioA").click(function(){
+        portfolioName = 'A';
+        retreiveAndSetPortfolioValues(portfolioName);
+        $("#PortfolioA,#PortfolioB,#PortfolioC").css("background-color", '#8FC6F6');
+        $("#PortfolioA").css("background-color", '#E67E22');
+    });
+    $("#PortfolioB").click(function(){
+        portfolioName = 'B';
+        retreiveAndSetPortfolioValues(portfolioName);
+        $("#PortfolioA,#PortfolioB,#PortfolioC").css("background-color", '#8FC6F6');
+        $("#PortfolioB").css("background-color", '#E67E22');
+    });
+    $("#PortfolioC").click(function(){
+        portfolioName = 'C';
+        retreiveAndSetPortfolioValues(portfolioName);
+        $("#PortfolioA,#PortfolioB,#PortfolioC").css("background-color", '#8FC6F6');
+        $("#PortfolioC").css("background-color", '#E67E22');
     });
 
-    $(".ltcAmount").text(ltcHoldings);
-    $(".btcAmount").text(btcHoldings);
-    $(".bchAmount").text(bchHoldings);
-    $(".ethAmount").text(ethHoldings);
-    $(".dashAmount").text(dashHoldings);
+    $("#RefreshFXRates").click(function(){
+        getPricesAndUpdateValuation();
+    });
 
     //Tap to update
     $(".ltcAmount").click(function(){
@@ -91,9 +82,9 @@ $(document).ready(function(){
 	    //var thisClass = $(this).attr("class");
             //$("."+thisClass).text(res);
 	     ltcHoldings = res;
-	     localStorage.setItem("ltcHoldings", ltcHoldings);
+	     localStorage.setItem("portfolio_" + portfolioName + "_ltcHoldings", ltcHoldings);
 	     $(".ltcAmount").text(ltcHoldings);
-	     getPricesAndUpdateValudation();
+	     getPricesAndUpdateValuation();
 	}
     });
     $(".btcAmount").click(function(){
@@ -102,9 +93,9 @@ $(document).ready(function(){
 	    //var thisClass = $(this).attr("class");
             //$("."+thisClass).text(res);
 	     btcHoldings = res;
-	     localStorage.setItem("btcHoldings", btcHoldings);
+	     localStorage.setItem("portfolio_" + portfolioName + "_btcHoldings", btcHoldings);
 	     $(".btcAmount").text(btcHoldings);
-	     getPricesAndUpdateValudation();
+	     getPricesAndUpdateValuation();
 	}
     });
     $(".bchAmount").click(function(){
@@ -113,9 +104,9 @@ $(document).ready(function(){
 	    //var thisClass = $(this).attr("class");
             //$("."+thisClass).text(res);
 	     bchHoldings = res;
-	     localStorage.setItem("bchHoldings", bchHoldings);
+	     localStorage.setItem("portfolio_" + portfolioName + "_bchHoldings", bchHoldings);
 	     $(".bchAmount").text(bchHoldings);
-	     getPricesAndUpdateValudation();
+	     getPricesAndUpdateValuation();
 	}
     });
     $(".ethAmount").click(function(){
@@ -124,9 +115,9 @@ $(document).ready(function(){
 	    //var thisClass = $(this).attr("class");
             //$("."+thisClass).text(res);
 	     ethHoldings = res;
-	     localStorage.setItem("ethHoldings", ethHoldings);
+	     localStorage.setItem("portfolio_" + portfolioName + "_ethHoldings", ethHoldings);
 	     $(".ethAmount").text(ethHoldings);
-	     getPricesAndUpdateValudation();
+	     getPricesAndUpdateValuation();
 	}
     });
     $(".dashAmount").click(function(){
@@ -135,31 +126,94 @@ $(document).ready(function(){
 	    //var thisClass = $(this).attr("class");
             //$("."+thisClass).text(res);
 	     dashHoldings = res;
-	     localStorage.setItem("dashHoldings", dashHoldings);
+	     localStorage.setItem("portfolio_" + portfolioName + "_dashHoldings", dashHoldings);
 	     $(".dashAmount").text(dashHoldings);
-	     getPricesAndUpdateValudation();
+	     getPricesAndUpdateValuation();
+	}
+    });
+    $(".xrpAmount").click(function(){
+        var res = prompt("Enter amount");;
+	if (!(res==null || res=="")) {
+	    //var thisClass = $(this).attr("class");
+            //$("."+thisClass).text(res);
+	     xrpHoldings = res;
+	     localStorage.setItem("portfolio_" + portfolioName + "_xrpHoldings", xrpHoldings);
+	     $(".xrpAmount").text(xrpHoldings);
+	     getPricesAndUpdateValuation();
 	}
     });
 
    //Make obvious buttons are selectable
-   $("#RefreshFXRates,.btcAmount,.bchAmount,.ltcAmount,.ethAmount,.dashAmount").css("background-color", '#8FC6F6');
+   $("#RefreshFXRates,.btcAmount,.bchAmount,.ltcAmount,.ethAmount,.dashAmount,.xrpAmount").css("background-color", '#8FC6F6');
     
 });
+
+
+
+function retreiveAndSetPortfolioValues(portfolioName){
+
+    //Default Holdings
+    ltcHoldings=10;
+    dashHoldings=1;
+    ethHoldings=1;
+    btcHoldings=0.1;
+    bchHoldings=0.1;
+    xrpHoldings=50;
+
+    //If exists in local web storage; use the values
+   res = localStorage.getItem("portfolio_" + portfolioName + "_ltcHoldings");
+   if( !(res==null || res=="")) {
+     ltcHoldings = res;
+   }
+   res = localStorage.getItem("portfolio_" + portfolioName + "_btcHoldings");
+   if( !(res==null || res=="")) {
+     btcHoldings = res;
+   }
+   res = localStorage.getItem("portfolio_" + portfolioName + "_bchHoldings");
+   if( !(res==null || res=="")) {
+     bchHoldings = res;
+   }
+   res = localStorage.getItem("portfolio_" + portfolioName + "_ethHoldings");
+   if( !(res==null || res=="")) {
+     ethHoldings = res;
+   }
+   res = localStorage.getItem("portfolio_" + portfolioName + "_dashHoldings");
+   if( !(res==null || res=="")) {
+     dashHoldings = res;
+   }
+   res = localStorage.getItem("portfolio_" + portfolioName + "_xrpHoldings");
+   if( !(res==null || res=="")) {
+     xrpHoldings = res;
+   }
+
+    $(".ltcAmount").text(ltcHoldings);
+    $(".btcAmount").text(btcHoldings);
+    $(".bchAmount").text(bchHoldings);
+    $(".ethAmount").text(ethHoldings);
+    $(".dashAmount").text(dashHoldings);
+    $(".xrpAmount").text(xrpHoldings);
+    $("#portfolioSelected").text("Portfolio " + portfolioName);
+
+    getPricesAndUpdateValuation();
+}
+
 
 var pieChartCounter=0;;
 function checkIfPieChartReadyForCreation(){
 	pieChartCounter++;
-  	if(pieChartCounter%10==0){
+  	if(pieChartCounter%12==0){
 	       var data=[{"cryptoType":"LTC", "totalAmount":ltcValuation},
 			{"cryptoType":"BTC","totalAmount":btcValuation},
 			{"cryptoType":"BCH","totalAmount":bchValuation},
 			{"cryptoType":"DASH","totalAmount":dashValuation},
+			{"cryptoType":"XRP","totalAmount":dashValuation},
 			{"cryptoType":"ETH","totalAmount":ethValuation}];
 		createPieChart(data,"#chart");
 	       var dataCC=[{"cryptoType":"LTC", "totalAmount":ltcValuationCC},
 			{"cryptoType":"BTC","totalAmount":btcValuationCC},
 			{"cryptoType":"BCH","totalAmount":bchValuationCC},
 			{"cryptoType":"DASH","totalAmount":dashValuationCC},
+			{"cryptoType":"XRP","totalAmount":dashValuationCC},
 			{"cryptoType":"ETH","totalAmount":ethValuationCC}];
 		createPieChart(dataCC,"#chartCC");
 	} 
@@ -171,14 +225,15 @@ function createPieChart(data,position){
 	{"cryptoType":"BTC","totalAmount":btcValuation},
 	{"cryptoType":"BCH","totalAmount":bchValuation},
 	{"cryptoType":"DASH","totalAmount":dashValuation},
-	{"cryptoType":"ETH","totalAmount":ethValuation}];
+	{"cryptoType":"ETH","totalAmount":ethValuation},
+	{"cryptoType":"XRP","totalAmount":xrpValuation}];
 
 	var width = 180,
 	    height = 180,
 	    radius = Math.min(width, height) / 2;
 
 	var color = d3.scale.ordinal()
-	    .range(["#D5D8DC", "#E67E22", "#E67E22",  "#5DADE2", "#8E44AD"]);
+	    .range(["#D5D8DC", "#E67E22", "#E67E22",  "#5DADE2", "#8E44AD","#1A69F3"]);
 
 	var arc = d3.svg.arc()
 	    .outerRadius(radius - 10)
@@ -219,7 +274,7 @@ function createPieChart(data,position){
 	    });
 }
 
-function getPricesAndUpdateValudation(){
+function getPricesAndUpdateValuation(){
         valuation=0;
         valuationCC=0;
 
@@ -286,6 +341,19 @@ function getPricesAndUpdateValudation(){
                       $("#ethHoldingsValue").text(format(Number(result.ticker.price*ethHoldings)));
 		      ethValuation=(result.ticker.price*ethHoldings);
 		      valuation+=ethValuation;
+		      $("#valuationInGBP").text(format(Number(valuation)));
+		      checkIfPieChartReadyForCreation();
+                  }
+        });
+        $.ajax({  type: "GET",
+                  dataType: 'json',
+                  async: true,
+                  url: "https://api.cryptonator.com/api/ticker/xrp-gbp",
+                  success: function(result){
+                      $("#xrpPrice").text(format(Number(result.ticker.price)));
+                      $("#xrpHoldingsValue").text(format(Number(result.ticker.price*xrpHoldings)));
+		      xrpValuation=(result.ticker.price*xrpHoldings);
+		      valuation+=xrpValuation;
 		      $("#valuationInGBP").text(format(Number(valuation)));
 		      checkIfPieChartReadyForCreation();
                   }
@@ -362,15 +430,34 @@ function getPricesAndUpdateValudation(){
 		      checkIfPieChartReadyForCreation();
                   }
         });
+
+	$.ajax({  type: "GET",
+                  dataType: 'json',
+                  async: true,
+                  url: "https://api.coinmarketcap.com/v1/ticker/RIPPLE/?convert=GBP",
+                  success: function(result){
+                      $("#xrpPriceCC").text(format(Number(result[0].price_gbp)));
+                      $("#xrpHoldingsValueCC").text(format(Number(result[0].price_gbp*xrpHoldings)));
+		      xrpValuationCC=(result[0].price_gbp*xrpHoldings);
+		      valuationCC+=xrpValuationCC;
+		      $("#valuationInGBPCC").text(format(Number(valuationCC)));
+		      checkIfPieChartReadyForCreation();
+                  }
+        });
 }
 
 </script>
 
 </head>
 <body align="center">
-<h2>Crypto Calculator</h2>
-<i>GBP calculator for BTC, BCH, LTC, ETH &amp DASH. Crypto amounts saved on your browser.</i>
+<i>GBP calculator for selected cryptos.</i>
 <br/>
+<i>Portfolio amounts saved on your browser.</i>
+<br/>
+<br/>
+<table border=1 align="center">
+<tr><td id="PortfolioA" >Portfolio A</td><td id="PortfolioB">Portfolio B</td><td id="PortfolioC">Portfolio C</td></tr>
+</table>
 <br/>
 <table border=0 align="center">
   <tr>
@@ -384,6 +471,7 @@ function getPricesAndUpdateValudation(){
 		<tr><td>BTC</td><td class="btcAmount"></td><td>&pound;<placeholder  id="btcPrice"></td><td>&pound;<placeholder  id="btcHoldingsValue"></td></tr>
 		<tr><td>BCH</td><td class="bchAmount"></td><td>&pound;<placeholder  id="bchPrice"></td><td>&pound;<placeholder  id="bchHoldingsValue"></td></tr>
 		<tr><td>ETH</td><td class="ethAmount"></td><td>&pound;<placeholder  id="ethPrice"></td><td>&pound;<placeholder  id="ethHoldingsValue"></td></tr>
+		<tr><td>XRP</td><td class="xrpAmount"></td><td>&pound;<placeholder  id="xrpPrice"></td><td>&pound;<placeholder  id="xrpHoldingsValue"></td></tr>
 		</table>
 	</td>
 	<td align="left">
@@ -401,6 +489,7 @@ function getPricesAndUpdateValudation(){
 		<tr><td>BTC</td><td class="btcAmount"></td><td>&pound;<placeholder  id="btcPriceCC"></td><td>&pound;<placeholder  id="btcHoldingsValueCC"></td></tr>
 		<tr><td>BCH</td><td class="bchAmount"></td><td>&pound;<placeholder  id="bchPriceCC"></td><td>&pound;<placeholder  id="bchHoldingsValueCC"></td></tr>
 		<tr><td>ETH</td><td class="ethAmount"></td><td>&pound;<placeholder  id="ethPriceCC"></td><td>&pound;<placeholder  id="ethHoldingsValueCC"></td></tr>
+		<tr><td>XRP</td><td class="xrpAmount"></td><td>&pound;<placeholder  id="xrpPriceCC"></td><td>&pound;<placeholder  id="xrpHoldingsValueCC"></td></tr>
 		</table>
 	</td>
 	<td>
