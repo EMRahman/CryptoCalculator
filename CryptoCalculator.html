@@ -38,7 +38,16 @@ $(document).ready(function(){
     portfolioName = 'A';
     retreiveAndSetPortfolioValues(portfolioName);
     getPrices();
-    updateValuation();
+
+    var initialPieChart = setInterval(function(){
+        if(pricesGained%12==0){
+            updateValuation();
+            console.log("clearing Interval");
+	    clearInterval(initialPieChart);
+	}
+            console.log("Interval");
+    },1000);
+	
     
     //$("#PortfolioA,#PortfolioB,#PortfolioC,#PortfolioD").css("background-color", '#8FC6F6');
     $('[id^="Portfolio"]').css("background-color", '#8FC6F6');
@@ -200,6 +209,7 @@ function updateValuation(){
 	  });
 }
 
+var pricesGained = 0;
 function getPrices(){
 	//coinmarketcap - has 10 per min limit
 	//Over 100 for snapshot can take longer than 1 sec
@@ -208,7 +218,7 @@ function getPrices(){
 	//Make one call - snapshot for top 100
 	$.ajax({  type: "GET",
                   dataType: 'json',
-                  async: false,
+                  async: true,
                   url: "https://api.coinmarketcap.com/v1/ticker/?convert=GBP&limit=10",
                   success: function(result){
                           $.each(coins,function(coinIndex,coinValue){
@@ -217,6 +227,7 @@ function getPrices(){
 					      coinValue.price=result[index].price_gbp;
 			                      $("#" + coinValue.symbolLowerCase + "PriceCC").text(format(Number(coinValue.price)));
 			                      $("#" + coinValue.symbolLowerCase + "PriceCC").effect("highlight", {color: 'green'}, 3000);
+						pricesGained++;
 				     }
 			    });
 			  });
@@ -228,13 +239,14 @@ function getPrices(){
 		if(coinValue.apiCallIndividual==true){
 		 $.ajax({  type: "GET",
                    dataType: 'json',
-                   async: false,
+                   async: true,
                    url: "https://api.coinmarketcap.com/v1/ticker/"+coinValue.tickerName+"/?convert=GBP",
                    success: function(result){
 			    $.each(result, function(index, value) {
 					      coinValue.price=result[index].price_gbp;
 			                      $("#" + coinValue.symbolLowerCase + "PriceCC").text(format(Number(coinValue.price)));
 			                      $("#" + coinValue.symbolLowerCase + "PriceCC").effect("highlight", {color: 'orange'}, 3000);
+						pricesGained++;
 			    });
  		   }
 		   });
